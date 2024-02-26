@@ -1,10 +1,7 @@
 let formElem;
-let roomElem;
 let radioInputs;
 let personsElem;
-let dateElem;
 let nightsElem;
-let extraElem;
 let extraCheckboxElem;
 let totalElem;
 let customerElem;
@@ -15,12 +12,9 @@ let telephoneElem;
 
 window.onload = () => {
     formElem = document.getElementById("booking");
-    roomElem = document.getElementById("room");
     radioInputs = document.querySelectorAll('input[name="roomType"]');
     personsElem = document.querySelector('select[name="persons"]');
-    dateElem = document.getElementById("date");
     nightsElem = document.querySelector('select[name="nights"]');
-    extraElem = document.getElementById("extra");
     extraCheckboxElem = document.querySelectorAll('input[name="addition"]');
     totalElem = document.getElementById("totalCost");
     campaignCodeElem = document.querySelector('input[name="campaigncode"]');
@@ -28,6 +22,8 @@ window.onload = () => {
     cityElem = document.getElementById("city");
     zipcodeElem = document.getElementById("zipcode");
     telephoneElem = document.getElementById("telephone");
+
+    feedbackElems = document.querySelectorAll("label + span");
 
     campaignCodeElem.addEventListener("keydown", campaignValidate);
     campaignCodeElem.addEventListener("blur", () => {
@@ -79,7 +75,6 @@ function calculatePrice() {
     }
 
     for (let i = 0; i < extraCheckboxElem.length; i++) {
-
         if (extraCheckboxElem[i].checked) {
             const match = regex.exec(extraCheckboxElem[i].value);
             totalSum += +match[0];
@@ -96,21 +91,38 @@ function capitalize() {
 }
 
 function validateInputs() {
-    const zipRegex = /^\d{3}[ |-]?\d{2}$/;
-    const telRegex = /^0\d{3}[ |\-|\/]?\d{3,7}$/;
+    const zipRegex = /^\d{3} ?\d{2}$/;
+    const telRegex = /^0\d{1,3}[ |\-|\/]?\d{5,8}$/;
 
-    const zip = validate(zipRegex, zipcodeElem.value);
-    const tel = validate(telRegex, telephoneElem.value);
+    const zip = validateRegex(zipRegex, zipcodeElem.value);
+    const tel = validateRegex(telRegex, telephoneElem.value);
 
+    if (!zip) {
+        if (validate(/\D/, zipcodeElem.value)) {
+            feedbackElems[0].innerHTML = "Postnummer får endast innehålla siffror"
+        } else {
+            feedbackElems[0].innerHTML = "Felaktig input";
+        }
+    } else {
+        feedbackElems[0].innerHTML = "";
+    }
+
+    if (!tel) {
+        if (validate(/\D/, telephoneElem.value)) {
+            feedbackElems[1].innerHTML = "Telefonnummer får endast innehålla siffror"
+        } else {
+            feedbackElems[1].innerHTML = "Felaktig input";
+        }
+    } else {
+        feedbackElems[1].innerHTML = "";
+    }
 
     if (zip & tel) {
-        console.log("funkar");
         formElem.submit();
     }
 }
 
-function validate(regex, value) {
-    console.log("validate")
+function validateRegex(regex, value) {
     return value.match(regex) != null;
 }
 
@@ -118,8 +130,8 @@ function campaignValidate() {
     const campaignRegex = /^\w{3}-\d{2}-\w\d$/i;
 
     if (validate(campaignRegex, campaignCodeElem.value)) {
-        campaignCodeElem.style.backgroundColor  = "#6f6"
+        campaignCodeElem.style.backgroundColor = "#6f6"
     } else {
-        campaignCodeElem.style.backgroundColor  = "#f66"
+        campaignCodeElem.style.backgroundColor = "#f66"
     }
 }
